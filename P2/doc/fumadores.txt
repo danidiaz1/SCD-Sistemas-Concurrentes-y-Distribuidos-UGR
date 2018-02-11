@@ -1,0 +1,106 @@
+Variables permanentes:
+
+	- NUM_FUMADORES: Entero constante que indica el número de hebras fumadoras. Se usa más tarde para saber el número de variables condición que tendremos (una por cada fumador).
+
+	- ingrediente_en_mesa: Entero que indica el ingrediente que hay actualmente en la mesa. Inicialmente vale -1, que indica mesa vacía.
+
+
+
+
+Colas:
+
+	- mostrador_vacio: Cola en la que esperará el estanquero si el mostrador está ocupado (ingrediente_en_mesa != -1)
+	- ingr_disp[NUM_FUMADORES]: Vector de colas, una por cada fumador, en la que esperará cada uno a que su ingrediente sea puesto en la mesa (ingrediente en mesa != numero_fumador). Esta condición incluye, explícitamente, que se esperará si la mesa está vacía, ya que nunca se va a necesitar el ingrediente "-1".
+
+
+
+
+Pseudocódigo de los procedimientos del monitor:
+
+procedure ponerIngrediente(ingr : int);
+begin
+	ingrediente_en_mesa := ingr;
+	ingr_disp[i].signal();
+end;
+
+procedure obtenerIngrediente(num_fumador : int);
+begin
+	if (ingrediente_en_mesa != num_fumador)
+		ingr_disp[i].wait();
+
+	ingrediente_en_mesa := -1;
+	mostrador_vacio.signal();
+end;
+
+procedure esperarRecogidaIngrediente();
+begin
+	if (ingrediente_en_mesa != -1)
+		mostrador_vacio.wait();
+end;
+
+
+
+
+
+Salida del programa:
+
+Fumadores SU: inicio simulación.
+Fumador 0 esperando ingrediente Tabaco
+Fumador 1 esperando ingrediente Papel
+Fumador 2 esperando ingrediente Cerillas
+Estanquero produce ingrediente: Tabaco, y tarda: 144 milisegundos	
+Puesto ingrediente: Tabaco
+Retirado ingrediente: Tabaco por el fumador 0
+Fumador 0  : empieza a fumar (184 milisegundos)
+Estanquero produce ingrediente: Papel, y tarda: 166 milisegundos	
+Puesto ingrediente: Papel
+Retirado ingrediente: Papel por el fumador 1
+Fumador 1  : empieza a fumar (129 milisegundos)
+Fumador 0  : termina de fumar, comienza espera de ingrediente Tabaco
+Estanquero produce ingrediente: Papel, y tarda: 59 milisegundos	
+Puesto ingrediente: Papel
+Fumador 1  : termina de fumar, comienza espera de ingrediente Papel
+Retirado ingrediente: Papel por el fumador 1
+Fumador 1  : empieza a fumar (21 milisegundos)
+Fumador 1  : termina de fumar, comienza espera de ingrediente Papel
+Estanquero produce ingrediente: Tabaco, y tarda: 160 milisegundos	
+Puesto ingrediente: Tabaco
+Retirado ingrediente: Tabaco por el fumador 0
+Fumador 0  : empieza a fumar (125 milisegundos)
+Estanquero produce ingrediente: Papel, y tarda: 44 milisegundos	
+Puesto ingrediente: Papel
+Retirado ingrediente: Papel por el fumador 1
+Fumador 1  : empieza a fumar (109 milisegundos)
+Estanquero produce ingrediente: Tabaco, y tarda: 50 milisegundos	
+Puesto ingrediente: Tabaco
+Fumador 0  : termina de fumar, comienza espera de ingrediente Tabaco
+Retirado ingrediente: Tabaco por el fumador 0
+Fumador 0  : empieza a fumar (56 milisegundos)
+Fumador 1  : termina de fumar, comienza espera de ingrediente Papel
+Fumador 0  : termina de fumar, comienza espera de ingrediente Tabaco
+Estanquero produce ingrediente: Cerillas, y tarda: 182 milisegundos	
+Puesto ingrediente: Cerillas
+Retirado ingrediente: Cerillas por el fumador 2
+Fumador 2  : empieza a fumar (180 milisegundos)
+Estanquero produce ingrediente: Tabaco, y tarda: 63 milisegundos	
+Puesto ingrediente: Tabaco
+Retirado ingrediente: Tabaco por el fumador 0
+Fumador 0  : empieza a fumar (33 milisegundos)
+Fumador 0  : termina de fumar, comienza espera de ingrediente Tabaco
+Fumador 2  : termina de fumar, comienza espera de ingrediente Cerillas
+Estanquero produce ingrediente: Cerillas, y tarda: 181 milisegundos	
+Puesto ingrediente: Cerillas
+Retirado ingrediente: Cerillas por el fumador 2
+Fumador 2  : empieza a fumar (72 milisegundos)
+Fumador 2  : termina de fumar, comienza espera de ingrediente Cerillas
+Estanquero produce ingrediente: Papel, y tarda: 118 milisegundos	
+Puesto ingrediente: Papel
+Retirado ingrediente: Papel por el fumador 1
+Fumador 1  : empieza a fumar (53 milisegundos)
+Fumador 1  : termina de fumar, comienza espera de ingrediente Papel
+Estanquero produce ingrediente: Tabaco, y tarda: 58 milisegundos	
+Puesto ingrediente: Tabaco
+Retirado ingrediente: Tabaco por el fumador 0
+Fumador 0  : empieza a fumar (111 milisegundos)
+Estanquero produce ingrediente: Papel, y tarda: 106 milisegundos	
+Puesto ingrediente: Papel

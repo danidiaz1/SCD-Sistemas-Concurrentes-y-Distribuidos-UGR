@@ -1,0 +1,220 @@
+Cambios sobre el programa prodcons2.cpp
+
+	- Nuevo conjunto de variables constantes: para el número de productores,
+	el número de consumidores, el nuevo número de procesos esperados, el nuevo id de proceso
+	para el buffer y dos variables para las etiquetas que identificarán los mensajes de los
+	productores o los consumidores.
+
+	const int
+	num_prod   = 4 , // numero de productores
+	num_cons   = 5 , // identificador del proceso consumidor
+	num_procesos_esperado =     // número total de procesos esperado
+	num_prod + num_cons + 1,
+	id_buffer  = num_prod , // identificador del proceso buffer
+	num_items  = num_prod * num_cons, // numero de items producidos o consumidos
+	tam_vector = 10, // tamaño del buffer
+	etiq_prod = 1, // Etiqueta para identificar mensaje de un productor
+	etiq_cons = 2; // Etiqueta para identificar mensaje de un consumidor
+
+
+	- Por comodidad, las funciones de producir y consumir reciben un identificador para imprimir
+	qué consumidor o productor ha efectuado la operación en cuestión.
+
+
+	- En las funciones funcion_consumidor y funcion_productor se ha cambiado el límite de
+	iteraciones del bucle for, para que todos los consumidores/productores hagan el mismo número
+	de operaciones producir o consumir oportunas.
+
+
+	- Se han cambiado los MPI_Ssend tanto en funcion_consumidor como en funcion_productor, añadiendo
+	en cada una el identificador de etiqueta correspondiente:
+
+	MPI_Ssend(..., ..., ..., id_buffer, etiq_prod/etiq_cons, ... );
+
+
+	- Ahora, la funcion buffer decide si pueden enviar solo productores, consumidores o ambos
+	comparando dichas etiquetas que se incluyeron en los Ssend.
+
+	if ( num_celdas_ocupadas == 0 )          // si buffer vacío
+     	id_etiq_aceptable = etiq_prod ;       // $~~~$ solo prod.
+    else if ( num_celdas_ocupadas == tam_vector ) // si buffer lleno
+        id_etiq_aceptable = etiq_cons ;      // $~~~$ solo cons.
+    else                                          // si no vacío ni lleno
+        id_etiq_aceptable = MPI_ANY_TAG ;     // $~~~$ cualquiera
+
+
+    - En consecuencia, la función buffer cambia su Receive, ya que puede recibir de cualquier emisor,
+    y decide si será un productor o un consumidor por la etiqueta del mensaje:
+
+    MPI_Recv( ..., ..., ..., MPI_ANY_SOURCE, id_etiq_aceptable, ..., &estado );
+
+
+    - Al igual que antes, para procesar el mensaje recibido en función de si ha sido de un productor o un
+    consumidor se compara con la etiqueta en el switch-case. Si ha sido un consumidor, se hace un Ssend
+    con el destinatario que envió la solicitud.
+
+	switch( estado.MPI_TAG ) // leer emisor del mensaje en metadatos
+	{
+	 case etiq_prod: // si ha sido el productor: insertar en buffer
+	    ...
+	    break;
+
+	 case etiq_cons: // si ha sido el consumidor: extraer y enviarle
+	    ...
+	    MPI_Ssend( ..., ..., ..., estado.MPI_SOURCE, ..., ...);
+	    break;
+	}
+
+
+	- Finalmente, en el main hay que decidir quien es productor, consumidor y el buffer:
+
+	if ( num_procesos_esperado == num_procesos_actual )
+	{
+	  // ejecutar la operación apropiada a 'id_propio'
+	  if ( (id_propio >= 0) && (id_propio <= num_prod-1) ) {
+	    cout << "Registrado proceso productor: " << id_propio << endl << flush;
+	    funcion_productor(id_propio%num_prod+1); 
+	  } else if ( id_propio == id_buffer ) {
+	    cout << "Registrado proceso buffer: " << id_buffer << endl << flush;
+	    funcion_buffer(); 
+	  }
+	  else {
+	    cout << "Registrado proceso consumidor: " << id_propio << endl << flush;
+	    funcion_consumidor(id_propio%num_cons+1); 
+	  }
+	    
+	}
+
+Listado parcial de la salida del programa:
+
+
+Registrado proceso consumidor: 7
+Registrado proceso productor: 2
+Registrado proceso consumidor: 8
+Registrado proceso productor: 3
+Registrado proceso buffer: 4
+Registrado proceso consumidor: 6
+Registrado proceso productor: 1
+Registrado proceso consumidor: 9
+Registrado proceso productor: 0
+Registrado proceso consumidor: 5
+Productor 3 ha producido valor 11
+Productor 3 va a enviar valor 11
+Buffer ha recibido valor 11
+Buffer va a enviar valor 11
+Consumidor 1 ha recibido valor 11
+Productor 2 ha producido valor 6
+Productor 2 va a enviar valor 6
+Buffer ha recibido valor 6
+Buffer va a enviar valor 6
+Consumidor 2 ha recibido valor 6
+Buffer ha recibido valor 7
+Buffer va a enviar valor 7
+Consumidor 3 ha recibido valor 7
+Productor 2 ha producido valor 7
+Productor 2 va a enviar valor 7
+Productor 4 ha producido valor 16
+Productor 4 va a enviar valor 16
+Buffer ha recibido valor 16
+Buffer va a enviar valor 16
+Consumidor 4 ha recibido valor 16
+Productor 1 ha producido valor 1
+Productor 1 va a enviar valor 1
+Buffer ha recibido valor 1
+Buffer va a enviar valor 1
+Consumidor 5 ha recibido valor 1
+Consumidor 1 ha consumido valor 11
+Productor 3 ha producido valor 12
+Productor 3 va a enviar valor 12
+Buffer ha recibido valor 12
+Buffer va a enviar valor 12
+Consumidor 1 ha recibido valor 12
+Productor 2 ha producido valor 8
+Productor 2 va a enviar valor 8
+Buffer ha recibido valor 8
+Buffer va a enviar valor 8
+Consumidor 2 ha consumido valor 6
+Consumidor 2 ha recibido valor 8
+Consumidor 4 ha consumido valor 16
+Consumidor 3 ha consumido valor 7
+Productor 3 ha producido valor 13
+Productor 3 va a enviar valor 13
+Buffer ha recibido valor 13
+Buffer va a enviar valor 13
+Consumidor 3 ha recibido valor 13
+Productor 4 ha producido valor 17
+Productor 4 va a enviar valor 17
+Buffer ha recibido valor 17
+Buffer va a enviar valor 17
+Consumidor 4 ha recibido valor 17
+Consumidor 5 ha consumido valor 1
+Productor 1 ha producido valor 2
+Productor 1 va a enviar valor 2
+Consumidor 5 ha recibido valor 2
+Buffer ha recibido valor 2
+Buffer va a enviar valor 2
+Productor 3 ha producido valor 14
+Productor 3 va a enviar valor 14
+Buffer ha recibido valor 14
+Consumidor 1 ha consumido valor 12
+Buffer va a enviar valor 14
+Consumidor 1 ha recibido valor 14
+Productor 1 ha producido valor 3
+Productor 1 va a enviar valor 3
+Buffer ha recibido valor 3
+Productor 3 ha producido valor 15
+Productor 3 va a enviar valor 15
+Buffer ha recibido valor 15
+Buffer va a enviar valor 3
+Consumidor 3 ha consumido valor 13
+Consumidor 3 ha recibido valor 3
+Productor 4 ha producido valor 18
+Productor 4 va a enviar valor 18
+Buffer ha recibido valor 18
+Productor 2 ha producido valor 9
+Productor 2 va a enviar valor 9
+Buffer ha recibido valor 9
+Consumidor 2 ha consumido valor 8
+Consumidor 2 ha recibido valor 15
+Buffer va a enviar valor 15
+Buffer va a enviar valor 18
+Consumidor 1 ha consumido valor 14
+Consumidor 1 ha recibido valor 18
+Consumidor 5 ha consumido valor 2
+Consumidor 5 ha recibido valor 9
+Buffer va a enviar valor 9
+Consumidor 4 ha consumido valor 17
+Productor 2 ha producido valor 10
+Productor 2 va a enviar valor 10
+Buffer ha recibido valor 10
+Buffer va a enviar valor 10
+Consumidor 4 ha recibido valor 10
+Consumidor 3 ha consumido valor 3
+Productor 1 ha producido valor 4
+Productor 1 va a enviar valor 4
+Buffer ha recibido valor 4
+Buffer va a enviar valor 4
+Consumidor 3 ha recibido valor 4
+Productor 1 ha producido valor 5
+Productor 1 va a enviar valor 5
+Buffer ha recibido valor 5
+Consumidor 1 ha consumido valor 18
+Productor 4 ha producido valor 19
+Productor 4 va a enviar valor 19
+Buffer ha recibido valor 19
+Consumidor 2 ha consumido valor 15
+Consumidor 2 ha recibido valor 5
+Buffer va a enviar valor 5
+Buffer va a enviar valor 19
+Consumidor 5 ha consumido valor 9
+Consumidor 5 ha recibido valor 19
+Consumidor 3 ha consumido valor 4
+Consumidor 4 ha consumido valor 10
+Productor 4 ha producido valor 20
+Productor 4 va a enviar valor 20
+Buffer ha recibido valor 20
+Buffer va a enviar valor 20
+Consumidor 4 ha recibido valor 20
+Consumidor 2 ha consumido valor 5
+Consumidor 5 ha consumido valor 19
+Consumidor 4 ha consumido valor 20

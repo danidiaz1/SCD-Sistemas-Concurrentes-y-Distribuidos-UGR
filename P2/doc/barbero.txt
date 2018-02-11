@@ -1,0 +1,284 @@
+1. Variables condición:
+
+	- barbero: Representa si el barbero está dormido (esperándose en la cola) o pelando.
+	  Se hace wait en el procedimiento "siguienteCliente", cuando no hay clientes disponibles para
+	  pelar (num_clientes == 0). Se hace signal en el procedimiento "cortarPelo(i)". Si el barbero 
+	  está durmiendo, un cliente entra en la barbería y hace signal
+
+	- sala_espera: Representa la cola de clientes, que esperan si hay alguien pelándose. Se hace
+	  signal en el procedimiento "siguienteCliente". Si no se está pelando a nadie en este momento,
+	  el barbero despierta a un cliente de la sala de espera. Se hace wait en el procedimiento 
+	  "cortarPelo(i)". Si hay alguien pelándose o alguien en la cola antes que él, es decir, 
+	  si num_clientes > 1, el cliente que acaba de entrar debe esperar.
+
+	- silla: Representa si hay algún cliente en la silla del barbero, es decir, pelándose.
+	  Se hace wait en el procedimiento "cortarPelo(i)". Cuando un cliente sale de la sala de espera,
+	  hace directamente el wait a esta cola, ya que el barbero lo ha llamado a pelarse y debe esperar
+	  a que este termine de hacerlo. Se hace signal en el procedimiento "finCliente", que lo ejecuta
+	  el barbero al terminar de pelar al cliente.
+
+
+
+
+2. Variables permanentes: 
+	
+	- num_clientes: Representa el número de clientes que ha entrado a la barbería. Nos sirve para controlar
+	  si un cliente debe esperar en la sala de espera o no (num_clientes >= 1), o si el barbero debe dormir 
+	  (num_clientes == 0)
+
+
+
+
+
+3. Pseudo-código de los procedimientos del monitor:
+
+{Variables permanentes}
+num_clientes : int = 0;
+
+{Procedimientos}
+procedure cortarPelo(i : int)
+{
+	num_clientes = num_clientes + 1
+
+	if not barbero.empty() then
+		barbero.signal()
+	endif
+	
+	if num_clientes > 1 then
+		sala_espera.wait()
+	endif
+
+	silla.wait()
+}
+
+procedure siguienteCliente()
+{
+	if num_clientes == 0 then
+		barbero.wait()
+	endif
+
+	if silla.empty() then
+		sala_espera.signal()
+	endif
+}
+
+void Barberia::finCliente()
+{
+	cout << endl << "El barbero termina de pelar al cliente" << endl;
+	silla.signal();
+	num_clientes--; // Cuando se termine de pelar, hay un cliente menos.
+}
+
+
+
+
+4. Traza de ejecución:
+
+Barberia SU: inicio simulación.
+
+El barbero esta durmiendo
+
+El cliente 0 entra en la barbería.
+
+El cliente 0 despierta al barbero 
+
+El barbero llama a un cliente
+
+El cliente 0 entra a pelarse.
+
+El cliente 5 entra en la barbería.
+
+El cliente 5 acaba de entrar en sala de espera
+
+El cliente 2 entra en la barbería.
+
+El cliente 2 acaba de entrar en sala de espera
+
+El cliente 1 entra en la barbería.
+
+El cliente 1 acaba de entrar en sala de espera
+
+El cliente 4 entra en la barbería.
+
+El cliente 4 acaba de entrar en sala de espera
+
+El cliente 6 entra en la barbería.
+
+El cliente 6 acaba de entrar en sala de espera
+
+El cliente 7 entra en la barbería.
+
+El cliente 7 acaba de entrar en sala de espera
+
+El cliente 8 entra en la barbería.
+
+El cliente 8 acaba de entrar en sala de espera
+
+El cliente 9 entra en la barbería.
+
+El cliente 9 acaba de entrar en sala de espera
+
+El cliente 3 entra en la barbería.
+
+El cliente 3 acaba de entrar en sala de espera
+El barbero pela al cliente y tarda: (105 milisegundos).
+
+El barbero termina de pelar al cliente
+
+El cliente 0 se marcha de la barbería. 
+Cliente 0  : espera fuera (46 milisegundos)
+
+El barbero llama a un cliente
+
+El cliente 5 entra a pelarse.
+Cliente 0  : termina de esperar fuera.
+
+El cliente 0 entra en la barbería.
+
+El cliente 0 acaba de entrar en sala de espera
+El barbero pela al cliente y tarda: (142 milisegundos).
+
+El barbero termina de pelar al cliente
+
+El cliente 5 se marcha de la barbería. 
+
+El barbero llama a un cliente
+Cliente 5  : espera fuera (127 milisegundos)
+
+El cliente 2 entra a pelarse.
+Cliente 5  : termina de esperar fuera.
+
+El cliente 5 entra en la barbería.
+
+El cliente 5 acaba de entrar en sala de espera
+El barbero pela al cliente y tarda: (159 milisegundos).
+
+El barbero termina de pelar al cliente
+
+El cliente 2 se marcha de la barbería. 
+
+El barbero llama a un cliente
+Cliente 2  : espera fuera (61 milisegundos)
+
+El cliente 1 entra a pelarse.
+El barbero pela al cliente y tarda: (20 milisegundos).
+
+El barbero termina de pelar al cliente
+
+El cliente 1 se marcha de la barbería. 
+
+El barbero llama a un cliente
+Cliente 1  : espera fuera (42 milisegundos)
+
+El cliente 4 entra a pelarse.
+Cliente 2  : termina de esperar fuera.
+
+El cliente 2 entra en la barbería.
+
+El cliente 2 acaba de entrar en sala de espera
+Cliente 1  : termina de esperar fuera.
+
+El cliente 1 entra en la barbería.
+
+El cliente 1 acaba de entrar en sala de espera
+El barbero pela al cliente y tarda: (94 milisegundos).
+
+El barbero termina de pelar al cliente
+
+El cliente 4 se marcha de la barbería. 
+Cliente 4  : espera fuera (35 milisegundos)
+
+El barbero llama a un cliente
+
+El cliente 6 entra a pelarse.
+El barbero pela al cliente y tarda: (30 milisegundos).
+
+El barbero termina de pelar al cliente
+
+El cliente 6 se marcha de la barbería. 
+
+El barbero llama a un cliente
+Cliente 6  : espera fuera (90 milisegundos)
+
+El cliente 7 entra a pelarse.
+Cliente 4  : termina de esperar fuera.
+
+El cliente 4 entra en la barbería.
+
+El cliente 4 acaba de entrar en sala de espera
+Cliente 6  : termina de esperar fuera.
+
+El cliente 6 entra en la barbería.
+
+El cliente 6 acaba de entrar en sala de espera
+El barbero pela al cliente y tarda: (193 milisegundos).
+
+El barbero termina de pelar al cliente
+
+El cliente 7 se marcha de la barbería. 
+
+El barbero llama a un cliente
+Cliente 7  : espera fuera (112 milisegundos)
+
+El cliente 8 entra a pelarse.
+El barbero pela al cliente y tarda: (57 milisegundos).
+
+El barbero termina de pelar al cliente
+
+El cliente 8 se marcha de la barbería. 
+
+El barbero llama a un cliente
+Cliente 8  : espera fuera (32 milisegundos)
+
+El cliente 9 entra a pelarse.
+Cliente 8  : termina de esperar fuera.
+
+El cliente 8 entra en la barbería.
+
+El cliente 8 acaba de entrar en sala de espera
+El barbero pela al cliente y tarda: (43 milisegundos).
+
+El barbero termina de pelar al cliente
+
+El cliente 9 se marcha de la barbería. 
+
+El barbero llama a un cliente
+Cliente 9  : espera fuera (144 milisegundos)
+
+El cliente 3 entra a pelarse.
+Cliente 7  : termina de esperar fuera.
+
+El cliente 7 entra en la barbería.
+
+El cliente 7 acaba de entrar en sala de espera
+Cliente 9  : termina de esperar fuera.
+
+El cliente 9 entra en la barbería.
+
+El cliente 9 acaba de entrar en sala de espera
+El barbero pela al cliente y tarda: (151 milisegundos).
+
+El barbero termina de pelar al cliente
+
+El cliente 3 se marcha de la barbería. 
+Cliente 3  : espera fuera (192 milisegundos)
+
+El barbero llama a un cliente
+
+El cliente 0 entra a pelarse.
+El barbero pela al cliente y tarda: (124 milisegundos).
+
+El barbero termina de pelar al cliente
+
+El cliente 0 se marcha de la barbería. 
+Cliente 0  : espera fuera (169 milisegundos)
+
+El barbero llama a un cliente
+
+El cliente 5 entra a pelarse.
+Cliente 3  : termina de esperar fuera.
+
+El cliente 3 entra en la barbería.
+
+El cliente 3 acaba de entrar en sala de espera
+El barbero pela al cliente y tarda: (93 milisegundos).
