@@ -8,4 +8,4 @@ Prácticas de Sistemas Concurrentes y Distribuidos (SCD), Grado en Ingeniería I
 - P3: Paso de mensajes (Sistemas distribuidos)
 - P4: Sistemas de tiempo real
 
-Y los seminarios correspondientes a las prácticas.
+Y los seminarios correspondientes a cada práctica.
