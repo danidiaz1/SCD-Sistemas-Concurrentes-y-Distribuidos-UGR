@@ -1,0 +1,14 @@
+Para realizar la versión FIFO, basta con tener 3 variables:
+	- primera_libre: siguiente casilla donde se puede escribir 
+	- primera_ocupada: siguiente casilla donde hay que leer
+	- n: número de elementos que todavía no se han consumido
+
+Ahora, en el método escribir, hay que preguntarse si "vamos a adelantar" a las lecturas, es decir, si vamos a escribir en un lugar donde todavía no se ha leido. Esto se consigue gracias a la variable n. El productor esperará si n == SIZE, es decir, si el vector está lleno de valores que todavía no se han leido.
+
+En tal caso, hacemos un wait a la cola "libres", que quiere decir que no hay casillas libres para escribir.
+
+Por otra parte, en el método leer, hay que preguntarse si la próxima casilla que vamos a leer es la misma sobre la que se tiene que escribir, es decir, todavía no se ha escrito de donde queremos leer. El consumidor esperará si n == 0, es decir, si no hay valores para leer.
+
+Una vez que el productor lea, incrementará la variable primera_libre en 1, es decir, actualiza la siguiente casilla donde escribirá. Igual pasa con el consumidor, que incrementa la variable primera_ocupada para saber cual es la siguiente celda de la que tiene que leer. Como podemos pasarnos del tamaño del vector (SIZE), utilizamos el operador módulo (%) para obtener la casilla correcta.
+
+Además, como es obvio, cada vez que se produce un dato, n aumenta en 1, y cada vez que se lee, n disminuye en 1.

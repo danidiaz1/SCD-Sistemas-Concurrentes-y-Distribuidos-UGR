@@ -1,0 +1,1 @@
+Al quitar el unlock de MContador2::incrementa, no estamos desbloqueando el cerrojo de la exclusión mutua, por lo que, cuando el procedimiento termina, el programa se queda bloqueado ya que ninguna hebra puede entrar a dicho procedimiento.

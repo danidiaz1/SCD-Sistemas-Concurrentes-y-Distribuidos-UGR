@@ -1,0 +1,3 @@
+Pregunta: Verifica si en el caso de la semántica SU es también necesario poner las operaciones wait dentro de un bucle while, o bien podemos sustituir dichos bucles por sentencias if. Explica por qué.
+
+Respuesta: Ya no es necesario poner un bucle while para volver a comprobar la condición si la hebra señalada se desbloquea, ya que cuando lo haga continuará su ejecución directamente, sin que otra hebra pueda interferir en el valor de la condición.

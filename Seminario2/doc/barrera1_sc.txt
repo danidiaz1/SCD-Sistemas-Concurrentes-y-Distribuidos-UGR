@@ -1,0 +1,15 @@
+1. La hebra que entra la última al método cita (la hebra señaladora) es siempre la primera en salir de dicho método.
+
+	- Como estamos en una semántica señalar y continuar y la última hebra en entrar es la que señala al resto, ella es la primera que adquiere la exclusión mutua del monitor, y por lo tanto es la primera en salir de método.
+
+2. El orden en el que las hebras señaladas logran entrar de nuevo al monitor no siempre coincide con el orden de salida de wait (se observa porque los números de orden de entrada no aparecen ordenados a la salida).
+
+	- Una vez que la hebra señaladora desbloquea al resto y sale del método, todas compiten por la entrada en exclusión mutua del mismo. Por tanto, es normal que unas veces salga un orden y otras otro completamente diferente. No hay nada que de preferencia a unas hebras sobre otras (quitando a la señaladora, que siempre es la primera en salir).
+
+3. El constructor de la clase no necesita ejecutarse en exclusión mutua.
+
+	- No hay ningún motivo por el cual el constructor necesite ejecutarse en E.M., ya que este se llama solo una vez en el main() y sólo se encarga de inicializar las variables del monitor. 
+
+4. Prueba a usar notify_all en lugar de notify_one. Describe razonadamente en tu portafolio si se observa o no algún cambio importante en la traza del programa.
+
+	- No ocurre nada, simplemente es igual que antes pero en vez de usar el bucle for para ir despertando las hebras de una en una, las despertamos todas a la vez.

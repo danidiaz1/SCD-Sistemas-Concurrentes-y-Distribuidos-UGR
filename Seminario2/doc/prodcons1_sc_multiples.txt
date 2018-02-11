@@ -1,0 +1,14 @@
+Pregunta: Describe razonadamente en tu portafolio a que se debe que (con semántica SC), la versión para múltiples productores y consumidores deba usar while, mientras que la versión para un único productor y consumidor puede usar simplemente if.
+
+Respuesta: En Señalar y Continuar, el proceso señalador continúa su ejecución dentro del monitor después del signal. El proceso señalado abandona la cola condición y espera en la cola del monitor para readquirir la E.M.
+
+Tanto el señalador como otros procesos pueden hacer falsa la condición despues de que el señalado abandone la cola condición, en este caso está dando errores en la condición de los lectores:
+
+while ( primera_libre == 0 )
+      ocupadas.wait( guarda );
+
+Es decir, puede que otro proceso lector gane la EM y entre al procedimiento leer(), donde ya no se cumple la condición primera_libre == 0. Como este procedimiento decrementa primera_libre en 1, puede ser que el lector que antes fue desbloqueado adquiera EM y retome el procedimiento del monitor por donde iba, sin comprobar la condición, e intente leer del vector la casilla -1. 
+
+Por tanto, en el proceso señalado no se puede garantizar que la condición es cierta al terminar y es necesario volver a comprobarla entonces.
+
+Evidentemente, antes funcionaba con if porque solo había una hebra productora y consumidora, luego era imposible que otras hebras modificaran los valores de la condición.

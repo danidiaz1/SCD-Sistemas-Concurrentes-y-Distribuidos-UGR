@@ -1,0 +1,10 @@
+Pregunta: De la traza se deduce lo siguiente:
+	- El orden de salida de la cita coincide siempre con el orden de entrada
+	- Hasta que todas las hebras de un grupo han salido de la cita, ninguna otra hebra que no sea del grupo logra entrar.
+
+Describe razondamente en tu portafolio a que se debe que ahora, con la semántica SU, se cumplan las dos propiedades descritas.
+
+
+Respuesta:
+	- El orden de entrada y salida coincide porque, una vez que la décima hebra llega a la condición y libera la primera de las hebras que llegó (política FIFO para las colas), esta continua su ejecución, y la hebra señaladora se queda en la cola de urgentes, que retomará la EM y seguirá liberando ordenadamente el resto de hebras bloqueadas, hasta que termine y sea la última en salir.
+	- Ninguna otra hebra puede entrar porque la décima hebra, la señaladora, tiene más prioridad para adquirir la EM del monitor. Así que hasta que no termine, las hebras de otro grupo no pueden entrar porque tienen menor prioridad.
